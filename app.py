@@ -4,6 +4,7 @@ import streamlit as st
 import plotly.graph_objs as go
 import numpy as np
 import time
+import pandas as pd
 from collections import deque
 from PIL import Image
 
@@ -34,6 +35,9 @@ if 'THRESHOLD' not in st.session_state:
 
 UPDATE_INTERVAL = 0.05  # Time between plot updates (seconds)
 BATCH_SIZE = 10  # Number of points to process before updating the plot
+
+# Global variable to store CSV data
+csv_data = None
 
 class SWKNN:
     """
@@ -107,10 +111,23 @@ def safe_division(numerator, denominator):
     """
     return numerator / denominator if denominator != 0 else 0
 
+def generate_csv():
+    """
+    Generate CSV data from the current session state.
+    """
+    global csv_data
+    df = pd.DataFrame({
+        'timestamp': st.session_state.data['x'],
+        'value': st.session_state.data['y'],
+        'is_anomaly': st.session_state.data['anomaly']
+    })
+    csv_data = df.to_csv(index=False)
+
 def main():
     """
     Main function to run the anomaly detection and visualization.
     """
+    global csv_data
 
     # Initialize session state
     if 'data' not in st.session_state:
@@ -146,6 +163,7 @@ def main():
     with col2:
         stats_placeholder = st.empty()
         stop_button = st.button("Stop")
+        download_placeholder = st.empty()
 
     # Initialize plot
     fig = go.Figure()
@@ -237,6 +255,19 @@ def main():
     finally:
         # Ensure final update of plot and stats
         update_plot_and_stats()
+
+        # Generate CSV after stopping
+        if not st.session_state.is_running:
+            with download_placeholder:
+                with st.spinner('Generating CSV...'):
+                    generate_csv()
+                if csv_data is not None:
+                    st.download_button(
+                        label="Download CSV",
+                        data=csv_data,
+                        file_name="anomaly_detection_data.csv",
+                        mime="text/csv",
+                    )
 
 if __name__ == "__main__":
     main()
