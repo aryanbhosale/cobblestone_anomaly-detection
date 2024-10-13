@@ -22,6 +22,8 @@ This project demonstrates **real-time anomaly detection** using a **Sliding Wind
 
 The **Sliding Window K-Nearest Neighbors (SWKNN)** algorithm is used for real-time anomaly detection in continuous data streams. It maintains a sliding window of the most recent data points and, for each new point, calculates the average distance to its **K nearest neighbors**. If the average distance exceeds a predefined **threshold**, the point is flagged as an anomaly.
 
+This approach is particularly effective in scenarios where real-time processing and dynamic adaptation to changing data patterns are crucial. For a deeper understanding of the theory and applications behind this method, refer to [this article from ScienceDirect](https://www.sciencedirect.com/science/article/pii/S0957417423014963).
+
 **Key Characteristics:**
 
 1. **Sliding Window:** Only the most recent points are considered, making the algorithm adaptable to changes in the data (concept drift).
