@@ -13,6 +13,7 @@ This project demonstrates **real-time anomaly detection** using a **Sliding Wind
 - [Key Features](#key-features)
 - [Fine-Tuning Parameters](#fine-tuning-parameters)
 - [How to Run](#how-to-run)
+- [Virtual Environment Setup](#virtual-environment-setup)
 - [Limitations](#limitations)
 
 ---
@@ -107,19 +108,56 @@ The performance of SWKNN is highly sensitive to three parameters: **K**, **WINDO
 
 ## How to Run
 
-1. **Install Dependencies:**
-   Make sure you have Python installed. Install required packages using:
+### Virtual Environment Setup
 
+Before running the program, it's recommended to set up a virtual environment to manage the dependencies. You can use either `conda` or Python's built-in `venv`:
+
+#### Using `conda`
+
+1. Create a new environment:
    ```bash
-   pip install -r requirements.txt
+   conda create --name myenv python=3.9
    ```
-2. **Run the Application:**
-   Start the Streamlit app using:
+2. Activate the environment:
+   ```bash
+   conda activate myenv
+   ```
+
+#### Using `venv` (Python's built-in virtual environment)
+
+1. Create a virtual environment:
+   ```bash
+   python -m venv venv
+   ```
+2. Activate the environment:
+   - **On Linux/macOS:**
+     ```bash
+     source venv/bin/activate
+     ```
+   - **On Windows:**
+     ```bash
+     venv\Scripts\activate
+     ```
+
+### Install Dependencies
+
+Once the virtual environment is activated, install the required packages:
+
+```bash
+pip install -r requirements.txt
+```
+
+---
+
+### Running the Application
+
+1. **Start the Streamlit App:**
+   To run the Streamlit frontend and visualize real-time anomaly detection:
 
    ```bash
    streamlit run app.py
    ```
-3. **Visualization:**
+2. **Visualization:**
    The Streamlit app will display a real-time graph of the data stream and mark any detected anomalies in red.
 
 ---
