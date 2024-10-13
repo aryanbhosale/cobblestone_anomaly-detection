@@ -3,6 +3,9 @@
 
 This project demonstrates **real-time anomaly detection** using a **Sliding Window K-Nearest Neighbors (SWKNN)** algorithm to monitor streaming data. The program is designed to identify unusual patterns or outliers in the data stream, and it uses a sliding window to adapt to recent data while detecting anomalies efficiently.
 
+![image](https://github.com/user-attachments/assets/3cce9856-01d8-45b6-a287-934e2e535065)
+
+
 ---
 
 ## Table of Contents
