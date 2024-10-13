@@ -1,10 +1,28 @@
+import os
+import sys
 import streamlit as st
 import plotly.graph_objs as go
 import numpy as np
-from collections import deque
 import time
+from collections import deque
+from PIL import Image
 
-st.set_page_config(page_title="Real-time Anomaly Detection 📈", layout="wide")
+# Add the parent directory to the Python path
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+# Get the directory of the current script
+script_dir = os.path.dirname(os.path.abspath(__file__))
+
+# Construct the path to logo.png
+logo_path = os.path.join(script_dir, "logo.png")
+im = Image.open(logo_path)
+
+# Set page metadata
+st.set_page_config(
+        page_title="Real-time Anomaly Detection",
+        layout="wide",
+        page_icon=im,
+    )
 
 # Constants
 if 'WINDOW_SIZE' not in st.session_state:
@@ -134,7 +152,7 @@ def main():
     fig.add_trace(go.Scatter(x=[], y=[], mode='lines', name='Data Stream'))
     fig.add_trace(go.Scatter(x=[], y=[], mode='markers', name='Anomalies', marker=dict(color='red', size=10)))
     fig.update_layout(
-        title='Real-time Data Stream with Anomaly Detection',
+        title='Real-time Data Stream with Anomaly Detection 📈',
         xaxis_title='Time',
         yaxis_title='Value',
         height=600,
