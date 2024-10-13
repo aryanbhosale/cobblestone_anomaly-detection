@@ -4,36 +4,16 @@ import numpy as np
 from collections import deque
 import time
 
-"""
-Anomaly Detection in Data Streams using Sliding Window K-Nearest Neighbors (SWKNN)
-
-This script implements real-time anomaly detection on a continuous data stream using the
-SWKNN algorithm. It's designed to identify unusual patterns or outliers in streaming data,
-which could represent various metrics such as financial transactions or system performance.
-
-Algorithm Explanation:
-The Sliding Window K-Nearest Neighbors (SWKNN) algorithm is used for anomaly detection.
-This algorithm maintains a sliding window of the most recent data points. For each new 
-point, it calculates the average distance to its K nearest neighbors within the window.
-If this average distance exceeds a predefined threshold, the point is flagged as an anomaly.
-
-Effectiveness:
-1. Adaptability: By using a sliding window, the algorithm can adapt to concept drift and
-   seasonal variations in the data.
-2. Simplicity: The algorithm is intuitive and easy to implement, making it suitable for
-   real-time applications.
-3. Efficiency: With proper optimization, SWKNN can process data streams quickly.
-4. Sensitivity: The algorithm can detect both global and local anomalies by comparing
-   each point to its nearest neighbors.
-
-However, it's worth noting that the effectiveness can be sensitive to the choice of
-parameters (window size, K, and threshold), which may need tuning for specific use cases.
-"""
+st.set_page_config(page_title="Real-time Anomaly Detection 📈", layout="wide")
 
 # Constants
-WINDOW_SIZE = 500  # Number of recent points to consider
-K = 5  # Number of nearest neighbors to compare
-THRESHOLD = 2.5  # Threshold for anomaly detection
+if 'WINDOW_SIZE' not in st.session_state:
+    st.session_state.WINDOW_SIZE = 500
+if 'K' not in st.session_state:
+    st.session_state.K = 5
+if 'THRESHOLD' not in st.session_state:
+    st.session_state.THRESHOLD = 2.5
+
 UPDATE_INTERVAL = 0.05  # Time between plot updates (seconds)
 BATCH_SIZE = 10  # Number of points to process before updating the plot
 
@@ -41,7 +21,6 @@ class SWKNN:
     """
     Sliding Window K-Nearest Neighbors algorithm for Real-time Stream Anomaly Detection.
     """
-
     def __init__(self, window_size, k, threshold):
         """
         Initialize the SWKNN anomaly detector.
@@ -90,14 +69,13 @@ def generate_data_stream():
     while True:
         # Generate base value with regular and seasonal patterns
         value = 10 + np.sin(t * 0.1) * 5 + np.sin(t * 0.01) * 3
-        
+
         # Add random noise
         value += np.random.normal(0, 0.5)
-        
+
         # Introduce occasional anomalies (5% chance)
         if np.random.random() < 0.05:
             value += np.random.choice([-1, 1]) * np.random.uniform(5, 10)
-        
         yield t, value
         t += 1
 
@@ -115,7 +93,6 @@ def main():
     """
     Main function to run the anomaly detection and visualization.
     """
-    st.set_page_config(page_title="Real-time Anomaly Detection 📈", layout="wide")
 
     # Initialize session state
     if 'data' not in st.session_state:
@@ -124,6 +101,23 @@ def main():
         st.session_state.total_anomalies = 0
         st.session_state.is_running = True
         st.session_state.stop_time = None
+        st.session_state.detector = SWKNN(st.session_state.WINDOW_SIZE, st.session_state.K, st.session_state.THRESHOLD)
+
+    # Sidebar for user inputs
+    with st.sidebar:
+        st.header("Algorithm Parameters")
+        new_window_size = st.slider("Window Size", 10, 1000, st.session_state.WINDOW_SIZE)
+        new_k = st.slider("K (Nearest Neighbors)", 1, 20, st.session_state.K)
+        new_threshold = st.slider("Anomaly Threshold", 0.1, 10.0, st.session_state.THRESHOLD, 0.1)
+
+    # Check if parameters have changed
+    if (new_window_size != st.session_state.WINDOW_SIZE or
+        new_k != st.session_state.K or
+        new_threshold != st.session_state.THRESHOLD):
+        st.session_state.WINDOW_SIZE = new_window_size
+        st.session_state.K = new_k
+        st.session_state.THRESHOLD = new_threshold
+        st.session_state.detector = SWKNN(new_window_size, new_k, new_threshold)
 
     # Create layout
     col1, col2 = st.columns([3, 1])
@@ -148,8 +142,7 @@ def main():
         yaxis=dict(fixedrange=False)
     )
 
-    # Initialize detector and data stream
-    detector = SWKNN(WINDOW_SIZE, K, THRESHOLD)
+    # Initialize data stream
     data_stream = generate_data_stream()
 
     def update_plot_and_stats():
@@ -159,7 +152,7 @@ def main():
         # Update main data series
         fig.data[0].x = st.session_state.data['x']
         fig.data[0].y = st.session_state.data['y']
-        
+
         # Update anomaly points
         anomaly_x = [x for x, is_anomaly in zip(st.session_state.data['x'], st.session_state.data['anomaly']) if is_anomaly]
         anomaly_y = [y for y, is_anomaly in zip(st.session_state.data['y'], st.session_state.data['anomaly']) if is_anomaly]
@@ -189,8 +182,8 @@ def main():
             # Process a batch of data points
             for _ in range(BATCH_SIZE):
                 t, value = next(data_stream)
-                is_anomaly = detector.detect_anomaly(value)
-                detector.add_point(value)
+                is_anomaly = st.session_state.detector.detect_anomaly(value)
+                st.session_state.detector.add_point(value)
 
                 st.session_state.total_points += 1
                 if is_anomaly:
@@ -206,8 +199,8 @@ def main():
             st.session_state.data['anomaly'].extend(batch_anomaly)
 
             # Update x-axis range to show the last WINDOW_SIZE points
-            if len(st.session_state.data['x']) > WINDOW_SIZE:
-                fig.update_xaxes(range=[st.session_state.data['x'][-WINDOW_SIZE], st.session_state.data['x'][-1]])
+            if len(st.session_state.data['x']) > st.session_state.WINDOW_SIZE:
+                fig.update_xaxes(range=[st.session_state.data['x'][-st.session_state.WINDOW_SIZE], st.session_state.data['x'][-1]])
 
             # Update plot and stats
             update_plot_and_stats()
